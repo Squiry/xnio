@@ -29,6 +29,8 @@ import java.nio.channels.Pipe;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+
+import org.xnio.WithLock;
 import org.xnio.Xnio;
 import org.xnio.XnioIoThread;
 import org.xnio.XnioWorker;
@@ -54,10 +56,10 @@ final class NioPipeSourceConduit extends NioHandle implements StreamSourceCondui
     @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<NioPipeSourceConduit> readTimeoutUpdater = AtomicIntegerFieldUpdater.newUpdater(NioPipeSourceConduit.class, "readTimeout");
 
-    NioPipeSourceConduit(final WorkerThread workerThread, final SelectionKey selectionKey, final NioPipeStreamConnection connection) {
+    NioPipeSourceConduit(final WorkerThread workerThread, final WithLock<SelectionKey> selectionKey, final NioPipeStreamConnection connection) {
         super(workerThread, selectionKey);
         this.connection = connection;
-        this.sourceChannel = (Pipe.SourceChannel) selectionKey.channel();
+        this.sourceChannel = (Pipe.SourceChannel) selectionKey.getValue().channel();
     }
 
     void handleReady(int ops) {

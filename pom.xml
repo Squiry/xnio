@@ -32,7 +32,7 @@
     <artifactId>xnio-all</artifactId>
     <packaging>pom</packaging>
     <name>XNIO Parent POM</name>
-    <version>3.9.0.Beta1-SNAPSHOT</version>
+    <version>3.9.0.Beta1-LOOM</version>
     <description>The aggregator POM of the XNIO project</description>
 
     <licenses>
@@ -171,4 +171,11 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <distributionManagement>
+        <repository>
+            <id>maven.squiry.xyz</id>
+            <name>Squiry maven repository</name>
+            <url>https://maven.squiry.xyz</url>
+        </repository>
+    </distributionManagement>
 </project>

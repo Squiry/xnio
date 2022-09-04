@@ -28,6 +28,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Set;
 import org.xnio.Option;
 import org.xnio.Options;
+import org.xnio.WithLock;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
@@ -37,10 +38,10 @@ final class NioSocketStreamConnection extends AbstractNioStreamConnection {
     private final ChannelClosed closedHandle;
     private final NioSocketConduit conduit;
 
-    NioSocketStreamConnection(final WorkerThread workerThread, final SelectionKey key, final ChannelClosed closedHandle) {
+    NioSocketStreamConnection(final WorkerThread workerThread, final WithLock<SelectionKey> key, final ChannelClosed closedHandle) {
         super(workerThread);
         conduit = new NioSocketConduit(workerThread, key, this);
-        key.attach(conduit);
+        key.getValue().attach(conduit);
         this.closedHandle = closedHandle;
         setSinkConduit(conduit);
         setSourceConduit(conduit);

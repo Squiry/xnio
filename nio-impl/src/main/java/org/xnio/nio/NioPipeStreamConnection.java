@@ -26,6 +26,7 @@ import java.nio.channels.Pipe;
 import java.nio.channels.SelectionKey;
 import org.xnio.Option;
 import org.xnio.Options;
+import org.xnio.WithLock;
 
 import static org.xnio.IoUtils.safeClose;
 
@@ -38,20 +39,20 @@ final class NioPipeStreamConnection extends AbstractNioStreamConnection {
     private final NioPipeSourceConduit sourceConduit;
     private final NioPipeSinkConduit sinkConduit;
 
-    NioPipeStreamConnection(final WorkerThread workerThread, final SelectionKey sourceKey, final SelectionKey sinkKey) {
+    NioPipeStreamConnection(final WorkerThread workerThread, final WithLock<SelectionKey> sourceKey, final WithLock<SelectionKey> sinkKey) {
         super(workerThread);
         if (sourceKey != null) {
             setSourceConduit(sourceConduit = new NioPipeSourceConduit(workerThread, sourceKey, this));
-            sourceKey.attach(sourceConduit);
-            sourceChannel = (Pipe.SourceChannel) sourceKey.channel();
+            sourceKey.getValue().attach(sourceConduit);
+            sourceChannel = (Pipe.SourceChannel) sourceKey.getValue().channel();
         } else {
             sourceConduit = null;
             sourceChannel = null;
         }
         if (sinkKey != null) {
             setSinkConduit(sinkConduit = new NioPipeSinkConduit(workerThread, sinkKey, this));
-            sinkKey.attach(sinkConduit);
-            sinkChannel = (Pipe.SinkChannel) sinkKey.channel();
+            sinkKey.getValue().attach(sinkConduit);
+            sinkChannel = (Pipe.SinkChannel) sinkKey.getValue().channel();
         } else {
             sinkConduit = null;
             sinkChannel = null;

@@ -33,11 +33,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.xnio.Buffers;
-import org.xnio.Option;
-import org.xnio.ChannelListener;
-import org.xnio.Options;
-import org.xnio.XnioExecutor;
+import org.xnio.*;
 import org.xnio.channels.MulticastMessageChannel;
 import org.xnio.channels.ReadListenerSettable;
 import org.xnio.channels.SocketAddressBuffer;
@@ -67,7 +63,7 @@ class NioUdpChannel extends AbstractNioChannel<NioUdpChannel> implements Multica
         this.datagramChannel = datagramChannel;
         final WorkerThread workerThread = worker.chooseThread();
         final SelectionKey key = workerThread.registerChannel(datagramChannel);
-        handle = new NioUdpChannelHandle(workerThread, key, this);
+        handle = new NioUdpChannelHandle(workerThread, new WithLock<>(key), this);
         key.attach(handle);
     }
 

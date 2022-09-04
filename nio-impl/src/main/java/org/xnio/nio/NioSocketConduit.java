@@ -30,10 +30,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import org.xnio.Bits;
-import org.xnio.Xnio;
-import org.xnio.XnioIoThread;
-import org.xnio.XnioWorker;
+
+import org.xnio.*;
 import org.xnio.channels.ReadTimeoutException;
 import org.xnio.channels.StreamSinkChannel;
 import org.xnio.channels.StreamSourceChannel;
@@ -64,17 +62,17 @@ final class NioSocketConduit extends NioHandle implements StreamSourceConduit, S
     @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<NioSocketConduit> writeTimeoutUpdater = AtomicIntegerFieldUpdater.newUpdater(NioSocketConduit.class, "writeTimeout");
 
-    NioSocketConduit(final WorkerThread workerThread, final SelectionKey selectionKey, final NioSocketStreamConnection connection) {
+    NioSocketConduit(final WorkerThread workerThread, final WithLock<SelectionKey> selectionKey, final NioSocketStreamConnection connection) {
         super(workerThread, selectionKey);
         this.connection = connection;
-        this.socketChannel = (SocketChannel) selectionKey.channel();
+        this.socketChannel = (SocketChannel) selectionKey.getValue().channel();
     }
 
     void handleReady(int ops) {
         try {
             if (ops == 0) {
                 // the dreaded bug
-                final SelectionKey key = getSelectionKey();
+                final SelectionKey key = getSelectionKey().getValue();
                 final int interestOps = key.interestOps();
                 if (interestOps != 0) {
                     ops = interestOps;
@@ -180,7 +178,7 @@ final class NioSocketConduit extends NioHandle implements StreamSourceConduit, S
 
     public void terminateWrites() throws IOException {
         if (connection.writeClosed()) try {
-            if (getSelectionKey().isValid()) {
+            if (getSelectionKey().getValue().isValid()) {
                 suspend(SelectionKey.OP_WRITE);
             }
             if (socketChannel.isOpen()) try {
@@ -312,7 +310,7 @@ final class NioSocketConduit extends NioHandle implements StreamSourceConduit, S
 
     public void terminateReads() throws IOException {
         if (connection.readClosed()) try {
-            if (getSelectionKey().isValid()) {
+            if (getSelectionKey().getValue().isValid()) {
                 suspend(SelectionKey.OP_READ);
             }
             if (socketChannel.isOpen()) try {

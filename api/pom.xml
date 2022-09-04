@@ -37,7 +37,7 @@
     <parent>
         <groupId>org.jboss.xnio</groupId>
         <artifactId>xnio-all</artifactId>
-        <version>3.9.0.Beta1-SNAPSHOT</version>
+        <version>3.9.0.Beta1-LOOM</version>
     </parent>
 
     <dependencies>
@@ -147,9 +147,9 @@
                     <excludes>
                         <exclude>java/**</exclude>
                     </excludes>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
+<!--                    <archive>-->
+<!--                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>-->
+<!--                    </archive>-->
                 </configuration>
             </plugin>
             <plugin>
@@ -191,36 +191,36 @@
                     </links>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Main-Class>org.xnio.Version</Main-Class>
-                        <Jar-Version>${project.version}</Jar-Version>
-                        <Jar-Name>${project.artifactId}</Jar-Name>
-                        <Export-Package>
-                            !*._private,
-                            org.xnio*;version=${project.version}
-                        </Export-Package>
-                        <Import-Package>
-                            sun.misc*;resolution:=optional,
-                            *
-                        </Import-Package>
-                        <Require-Capability>
-                            osgi.service;effective:=active;filter:="(objectClass=org.xnio.Xnio)"
-                        </Require-Capability>
-                    </instructions>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>manifest</id>
-                        <goals>
-                            <goal>manifest</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.felix</groupId>-->
+<!--                <artifactId>maven-bundle-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <instructions>-->
+<!--                        <Main-Class>org.xnio.Version</Main-Class>-->
+<!--                        <Jar-Version>${project.version}</Jar-Version>-->
+<!--                        <Jar-Name>${project.artifactId}</Jar-Name>-->
+<!--                        <Export-Package>-->
+<!--                            !*._private,-->
+<!--                            org.xnio*;version=${project.version}-->
+<!--                        </Export-Package>-->
+<!--                        <Import-Package>-->
+<!--                            sun.misc*;resolution:=optional,-->
+<!--                            *-->
+<!--                        </Import-Package>-->
+<!--                        <Require-Capability>-->
+<!--                            osgi.service;effective:=active;filter:="(objectClass=org.xnio.Xnio)"-->
+<!--                        </Require-Capability>-->
+<!--                    </instructions>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>manifest</id>-->
+<!--                        <goals>-->
+<!--                            <goal>manifest</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>

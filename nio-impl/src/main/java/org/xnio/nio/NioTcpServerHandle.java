@@ -28,6 +28,7 @@ import static java.lang.Math.max;
 import static java.lang.Thread.currentThread;
 
 import org.jboss.logging.Logger;
+import org.xnio.WithLock;
 
 import static org.xnio.IoUtils.safeClose;
 import static org.xnio.nio.Log.tcpServerConnectionLimitLog;
@@ -49,7 +50,7 @@ final class NioTcpServerHandle extends NioHandle implements ChannelClosed {
     private boolean backOff;
     private int backOffTime = 0;
 
-    NioTcpServerHandle(final NioTcpServer server, final SelectionKey key, final WorkerThread thread, final int low, final int high) {
+    NioTcpServerHandle(final NioTcpServer server, final WithLock<SelectionKey> key, final WorkerThread thread, final int low, final int high) {
         super(thread, key);
         this.server = server;
         this.low = low;

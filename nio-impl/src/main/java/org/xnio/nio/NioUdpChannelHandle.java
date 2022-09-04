@@ -23,6 +23,7 @@ import java.nio.channels.SelectionKey;
 import org.xnio.Bits;
 import org.xnio.ChannelListeners;
 import org.xnio.IoUtils;
+import org.xnio.WithLock;
 
 /**
  * @author <a href="mailto:david.lloyd@redhat.com">David M. Lloyd</a>
@@ -30,7 +31,7 @@ import org.xnio.IoUtils;
 final class NioUdpChannelHandle extends NioHandle {
     private final NioUdpChannel channel;
 
-    NioUdpChannelHandle(final WorkerThread workerThread, final SelectionKey selectionKey, final NioUdpChannel channel) {
+    NioUdpChannelHandle(final WorkerThread workerThread, final WithLock<SelectionKey> selectionKey, final NioUdpChannel channel) {
         super(workerThread, selectionKey);
         this.channel = channel;
     }
@@ -39,7 +40,7 @@ final class NioUdpChannelHandle extends NioHandle {
         try {
             if (ops == 0) {
                 // the dreaded bug
-                final SelectionKey key = getSelectionKey();
+                final SelectionKey key = getSelectionKey().getValue();
                 final int interestOps = key.interestOps();
                 if (interestOps != 0) {
                     ops = interestOps;

@@ -28,6 +28,8 @@ import java.nio.channels.Pipe;
 import java.nio.channels.SelectionKey;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+
+import org.xnio.WithLock;
 import org.xnio.Xnio;
 import org.xnio.XnioIoThread;
 import org.xnio.XnioWorker;
@@ -52,10 +54,10 @@ final class NioPipeSinkConduit extends NioHandle implements StreamSinkConduit {
     @SuppressWarnings("rawtypes")
     private static final AtomicIntegerFieldUpdater<NioPipeSinkConduit> writeTimeoutUpdater = AtomicIntegerFieldUpdater.newUpdater(NioPipeSinkConduit.class, "writeTimeout");
 
-    NioPipeSinkConduit(final WorkerThread workerThread, final SelectionKey selectionKey, final NioPipeStreamConnection connection) {
+    NioPipeSinkConduit(final WorkerThread workerThread, final WithLock<SelectionKey> selectionKey, final NioPipeStreamConnection connection) {
         super(workerThread, selectionKey);
         this.connection = connection;
-        this.sinkChannel = (Pipe.SinkChannel) selectionKey.channel();
+        this.sinkChannel = (Pipe.SinkChannel) selectionKey.getValue().channel();
     }
 
     void handleReady(int ops) {

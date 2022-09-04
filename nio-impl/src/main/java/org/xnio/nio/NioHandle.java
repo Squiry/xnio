@@ -18,6 +18,8 @@
 
 package org.xnio.nio;
 
+import org.xnio.WithLock;
+
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 
@@ -29,16 +31,16 @@ import static org.xnio.Bits.allAreSet;
  */
 abstract class NioHandle {
     private final WorkerThread workerThread;
-    private final SelectionKey selectionKey;
+    private final WithLock<SelectionKey> selectionKey;
 
-    protected NioHandle(final WorkerThread workerThread, final SelectionKey selectionKey) {
+    protected NioHandle(final WorkerThread workerThread, final WithLock<SelectionKey> selectionKey) {
         this.workerThread = workerThread;
         this.selectionKey = selectionKey;
     }
 
     void resume(final int ops) {
         try {
-            if (! allAreSet(selectionKey.interestOps(), ops)) {
+            if (! allAreSet(selectionKey.getValue().interestOps(), ops)) {
                 workerThread.setOps(selectionKey, ops);
             }
         } catch (CancelledKeyException ignored) {}
@@ -51,7 +53,7 @@ abstract class NioHandle {
             }
         });
         try {
-            if (! allAreSet(selectionKey.interestOps(), ops)) {
+            if (! allAreSet(selectionKey.getValue().interestOps(), ops)) {
                 workerThread.setOps(selectionKey, ops);
             }
         } catch (CancelledKeyException ignored) {}
@@ -59,7 +61,7 @@ abstract class NioHandle {
 
     void suspend(final int ops) {
         try {
-            if (! allAreClear(selectionKey.interestOps(), ops)) {
+            if (! allAreClear(selectionKey.getValue().interestOps(), ops)) {
                 workerThread.clearOps(selectionKey, ops);
             }
         } catch (CancelledKeyException ignored) {}
@@ -67,7 +69,7 @@ abstract class NioHandle {
 
     boolean isResumed(final int ops) {
         try {
-            return allAreSet(selectionKey.interestOps(), ops);
+            return allAreSet(selectionKey.getValue().interestOps(), ops);
         } catch (CancelledKeyException ignored) {
             return false;
         }
@@ -83,11 +85,11 @@ abstract class NioHandle {
         return workerThread;
     }
 
-    SelectionKey getSelectionKey() {
+    WithLock<SelectionKey> getSelectionKey() {
         return selectionKey;
     }
 
     void cancelKey(final boolean block) {
-        workerThread.cancelKey(selectionKey, block);
+        workerThread.cancelKey(selectionKey.getValue(), block);
     }
 }

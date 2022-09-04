@@ -40,15 +40,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 import org.jboss.logging.Logger;
-import org.xnio.ChannelListener;
-import org.xnio.ManagementRegistration;
-import org.xnio.IoUtils;
-import org.xnio.LocalSocketAddress;
-import org.xnio.Option;
-import org.xnio.OptionMap;
-import org.xnio.Options;
-import org.xnio.StreamConnection;
-import org.xnio.XnioExecutor;
+import org.xnio.*;
 import org.xnio.channels.AcceptListenerSettable;
 import org.xnio.channels.AcceptingChannel;
 import org.xnio.channels.UnsupportedOptionException;
@@ -193,7 +185,7 @@ final class NioTcpServer extends AbstractNioChannel<NioTcpServer> implements Acc
         final NioTcpServerHandle[] handles = new NioTcpServerHandle[threadCount];
         for (int i = 0, length = threadCount; i < length; i++) {
             final SelectionKey key = threads[i].registerChannel(channel);
-            handles[i] = new NioTcpServerHandle(this, key, threads[i], i < perThreadHighRem ? perThreadHigh + 1 : perThreadHigh, i < perThreadLowRem ? perThreadLow + 1 : perThreadLow);
+            handles[i] = new NioTcpServerHandle(this, new WithLock<>(key), threads[i], i < perThreadHighRem ? perThreadHigh + 1 : perThreadHigh, i < perThreadLowRem ? perThreadLow + 1 : perThreadLow);
             key.attach(handles[i]);
         }
         this.handles = handles;
@@ -419,7 +411,7 @@ final class NioTcpServer extends AbstractNioChannel<NioTcpServer> implements Acc
                 if (sendBuffer > 0) socket.setSendBufferSize(sendBuffer);
                 final WorkerThread ioThread = worker.getIoThread(hash);
                 final SelectionKey selectionKey = ioThread.registerChannel(accepted);
-                final NioSocketStreamConnection newConnection = new NioSocketStreamConnection(ioThread, selectionKey, handle);
+                final NioSocketStreamConnection newConnection = new NioSocketStreamConnection(ioThread, new WithLock<>(selectionKey), handle);
                 newConnection.setOption(Options.READ_TIMEOUT, Integer.valueOf(readTimeout));
                 newConnection.setOption(Options.WRITE_TIMEOUT, Integer.valueOf(writeTimeout));
                 ok = true;
